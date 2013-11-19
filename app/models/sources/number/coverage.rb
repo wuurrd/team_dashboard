@@ -35,7 +35,7 @@ module Sources
       def get(options = {})
         widget     = Widget.find(options.fetch(:widget_id))
         url = widget.settings.fetch(:url)
-        if widget.settings.fetch(:rcov)
+        if widget.settings.fetch(:rcov) == "true"
           return self.get_rcov(url)
         else
           return self.get_cobertura(url)
@@ -45,7 +45,7 @@ module Sources
       def get_rcov(url)
         response = HTTParty.get("#{url}api/json")
 
-        doc = JSON.parse(HTTParty.get(response).body)
+        doc = JSON.parse(response.body)
         coverage = doc['healthReport'].to_s
         cov_pattern = /\((.*)\)/
         value = coverage.match(cov_pattern)[1].to_f
