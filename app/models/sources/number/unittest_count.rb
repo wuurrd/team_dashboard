@@ -37,9 +37,6 @@ module Sources
         url = widget.settings.fetch(:url)
         project = widget.settings.fetch(:project)
         url  = "#{url}/job/#{project}/api/json"
-        puts '--------------------------------------'
-        puts url
-        puts '--------------------------------------'
         response = HTTParty.get(url)
 
         doc = JSON.parse(response.body)
