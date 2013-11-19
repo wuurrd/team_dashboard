@@ -28,13 +28,31 @@ module Sources
       def custom_fields
         [
           { :name => "url", :title => "URL", :mandatory => true },
+          { :name => "rcov", :title => "rcov", :mandatory => false }
         ]
       end
 
       def get(options = {})
         widget     = Widget.find(options.fetch(:widget_id))
         url = widget.settings.fetch(:url)
+        if widget.settings.fetch(:rcov)
+          return self.get_rcov(url)
+        else
+          return self.get_cobertura(url)
+        end
+      end
 
+      def get_rcov(url)
+        response = HTTParty.get("#{url}api/json")
+
+        doc = JSON.parse(HTTParty.get(response).body)
+        coverage = doc['healthReport'].to_s
+        cov_pattern = /\((.*)\)/
+        value = coverage.match(cov_pattern)[1].to_f
+        { :value => value }
+      end
+
+      def get_cobertura(url)
         response = HTTParty.get(url)
 
         redirected_url = response.request.last_uri.to_s[0..-3]
