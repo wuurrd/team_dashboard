@@ -23,7 +23,6 @@ module Sources
           data = []
           target_data['data'].each do |d|
             data << [d[1], d[0].to_f / 1000.0]
-            puts from, to, d[0]
           end
           datapoints << { :target => target, :datapoints => data }
         end
@@ -39,7 +38,6 @@ module Sources
         workers.each do |worker|
             targets << worker[0].to_s
         end
-        puts "FOO", targets
         targets
       end
 
