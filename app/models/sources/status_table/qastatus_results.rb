@@ -60,7 +60,7 @@ module Sources
           if target_model != "false"
             results_url << "&target_model=#{target_model}"
           end
-          target_data = cached_get("results_#{test_id}", 1) do
+          target_data = cached_get("results_#{test_id}_#{target_model}", 1) do
             JSON.parse(HTTParty.get(results_url).body)
           end
           build_json_response(target_data, test_name)
