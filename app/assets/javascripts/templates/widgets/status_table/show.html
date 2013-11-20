@@ -8,7 +8,7 @@
     </thead>
     <tbody ng-click="showFileMessage()">
       <tr ng-repeat="label in data.label">
-        <td><div class="status_table-value value-size-smaller" ng-class="{ green:label.status == 0, orange:label.status == 1, red:label.status == 2, blue:label.status>2 }"></div></td>
+        <td><div class="status_table-value value-size-smaller" ng-class="{ grey:label.status == -1, green:label.status == 0, orange:label.status == 1, red:label.status == 2, blue:label.status>2 }"></div></td>
         <td>{{ label.label }}</td>
         <td>{{ label.value }}</td>
       </tr>

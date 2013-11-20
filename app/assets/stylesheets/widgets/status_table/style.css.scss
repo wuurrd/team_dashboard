@@ -1,5 +1,5 @@
 .status_table-widget {
-  
+
   .status_table-overall_value {
     float: left;
     width: 70px;
@@ -44,7 +44,7 @@
   }
 
   .file_label {
-  
+
     position: relative;
     margin-top: 10px;
     float: left;
@@ -78,6 +78,11 @@
   .blue {
     background: #447ab2;
     border: 2px solid darken(#2f547b, 10%);
+  }
+
+  .grey {
+    background: #ccc;
+    border: 2px solid darken(#ccc, 10%);
   }
 
   .orange {
