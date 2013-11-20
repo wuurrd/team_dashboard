@@ -99,7 +99,7 @@ module Sources
         else
           overall_value = 0
         end
-        { :overall_value => overall_value, :first_value => test_name, :label => all_messages }
+        { :overall_value => overall_value, :first_value => {"label" => test_name, "value" => ""}, :label => all_messages }
       end
 
     end
