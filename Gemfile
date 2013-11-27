@@ -13,6 +13,7 @@ gem "mysql2"
 
 # on windows replace with thin gem
 gem "unicorn"
+gem "thin"
 
 gem "faraday"
 gem "faraday_middleware"
