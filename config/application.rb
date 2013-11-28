@@ -50,7 +50,7 @@ module TeamDashboard
     config.assets.js_compressor = Uglifier.new(:mangle => false)
     config.assets.precompile = %w(select2.png, spinner-gray-bg.gif spinner-green-bg.gif spinner-red-bg.gif spinner.gif spinner2.gif)
 
-    config.graphite_url     = ENV['GRAPHITE_URL']
+    config.graphite_url     = "http://qa-dashboard.rd.tandberg.com"
     config.ganglia_web_url  = ENV['GANGLIA_WEB_URL']
     config.ganglia_host     = ENV['GANGLIA_HOST']
     config.pingdom_username = ENV['PINGDOM_USERNAME']
