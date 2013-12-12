@@ -34,10 +34,10 @@ module Sources
         sort_by = widget.settings.fetch(:sort_by)
         direction = widget.settings.fetch(:direction)
         target_models = targetsArray(widget.settings.fetch(:target_model))
-        
-        params = "limit=100000000"
-        params << "&sort_by=#{sort_by}" if sort_by
-        params << "&direction=#{direction}" if direction
+                
+        params = "limit=1000000"
+        params << "&sort_by=#{sort_by}" unless sort_by.blank?
+        params << "&direction=#{direction}" unless direction.blank?
         params << "&from_date=#{Time.at(from)}"
         params << "&to_date=#{Time.at(to)}"
         target_models.each do |target_model|
@@ -50,8 +50,9 @@ module Sources
           url = URI::encode(url)
           response = HTTParty.get(url).body
           test = JSON.parse(response)
+          results = test['results'].sort_by { |r| r['created_at'] }
           data = []
-          test['results'].each do |result|
+          results.each do |result|
             timestamp = result['created_at'].to_time.to_i
             duration = itvm_duration(result)
             if duration.abs > 5
