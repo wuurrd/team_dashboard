@@ -3,7 +3,7 @@ require 'json'
 
 module Sources
   module Datapoints
-    class QastatusTestDuration < Sources::Datapoints::Base
+    class ItvmTestTimer < Sources::Datapoints::Base
 
       def supports_target_browsing?
         false
@@ -11,6 +11,7 @@ module Sources
 
       def custom_fields
         [
+          { name: "hostname", title: "QA Status Hostname", mandatory: true },
           { name: "project", title: "Project", mandatory: true },
           { name: "branch", title: "Branch", mandatory: true },
           { name: "sort_by", title: "Sort By", mandatory: false },
@@ -27,27 +28,29 @@ module Sources
         targets = targetsArray(widget.settings.fetch(:targets))
         source  = options[:source]
 
-        hostname = "qastatus.rd.tandberg.com"
+        hostname = widget.settings.fetch(:hostname)
         project = widget.settings.fetch(:project)
         branch = widget.settings.fetch(:branch)
         sort_by = widget.settings.fetch(:sort_by)
         direction = widget.settings.fetch(:direction)
-        target_model = widget.settings.fetch(:target_model)
+        target_models = targetsArray(widget.settings.fetch(:target_model))
+                
+        params = "limit=1000000"
+        params << "&sort_by=#{sort_by}" unless sort_by.blank?
+        params << "&direction=#{direction}" unless direction.blank?
+        params << "&from_date=#{Time.at(from)}"
+        params << "&to_date=#{Time.at(to)}"
+        target_models.each do |target_model|
+          params << "&target_model[]=#{target_model}"
+        end
 
         datapoints = []
         targets.each do |target|
-          query = "test_id=#{target}"
-          query << "&sort_by=#{sort_by}"
-          query << "&target_model=#{target_model}"
-          query << "&limit=100000000"
-          query << "&from_date=#{Time.at(from)}"
-          query << "&to_date=#{Time.at(to)}"
-
-          url = "http://#{hostname}/#{project}/#{branch}/results.json?#{query}"
+          url = "http://#{hostname}/#{project}/#{branch}/tezts/#{target}/results.json?#{params}"
           url = URI::encode(url)
-          results = HTTParty.get(url).body
-          results = JSON.parse(results)
-          results = results.sort_by {|r| r['created_at']}
+          response = HTTParty.get(url).body
+          test = JSON.parse(response)
+          results = test['results'].sort_by { |r| r['created_at'] }
           data = []
           results.each do |result|
             timestamp = result['created_at'].to_time.to_i
@@ -56,7 +59,7 @@ module Sources
               data << [duration, timestamp]
             end
           end
-          datapoints << { target: target, datapoints: data}
+          datapoints << { target: "#{test['name']}", datapoints: data}
         end
         datapoints
       end
@@ -68,17 +71,9 @@ module Sources
         finished_at - created_at - test_duration
       end
 
-      # def available_targets(options = {})
-      #   pattern = options[:pattern] || ""
-      #   limit = options[:limit] || 200
-      #   response = HTTParty.get('http://itvm.qa.rd.tandberg.com/worker/widget/list')
-      #   workers = JSON.parse(response.body)
-      #   targets = []
-      #   workers.each do |worker|
-      #       targets << worker[0].to_s
-      #   end
-      #   targets
-      # end
+      #def available_targets(options = {})
+      # not supported
+      #end
 
     end
   end
