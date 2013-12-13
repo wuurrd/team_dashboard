@@ -37,6 +37,7 @@ module Sources
 
       def custom_fields
         [
+          { :name => "hostname", :title => "QA Status Hostname", :mandatory => false },
           { :name => "project", :title => "Project", :mandatory => true },
           { :name => "branch", :title => "Branch", :mandatory => true },
           { :name => "test_id", :title => "Test ID", :mandatory => true },
@@ -46,29 +47,24 @@ module Sources
 
       # Returns ruby hash:
       def get(options = {})
-          widget     = Widget.find(options.fetch(:widget_id))
+          widget = Widget.find(options.fetch(:widget_id))
+          hostname = widget.settings.fetch(:hostname).presence || "qastatus.rd.tandberg.com"
           project = widget.settings.fetch(:project)
           branch = widget.settings.fetch(:branch)
           test_id = widget.settings.fetch(:test_id)
-          target_model = widget.settings.fetch(:target_model)
+          target_models = widget.settings.fetch(:target_model).split(";").map { |t| t.strip }
 
-          tests_url = "http://qastatus.rd.tandberg.com/#{project}/#{branch}/tezts/#{test_id}.json"
-          test_name  = cached_get("name", 120) do
-            JSON.parse(HTTParty.get(tests_url).body)["name"]
+          params = "limit=9"
+          target_models.each { |model| params << "&target_model[]=#{model}" }
+          url = "http://#{hostname}/#{project}/#{branch}/tezts/#{test_id}/results.json?#{params}"
+
+          data = cached_get(url, 1) do
+            JSON.parse(HTTParty.get(url).body)
           end
-          results_url = "http://qastatus.rd.tandberg.com/#{project}/#{branch}/results.json?test_id=#{test_id}&limit=9"
-          if target_model != "false"
-            results_url << "&target_model=#{target_model}"
-          end
-          target_data = cached_get("results_#{test_id}_#{target_model}", 1) do
-            JSON.parse(HTTParty.get(results_url).body)
-          end
-          build_json_response(target_data, test_name)
+          build_json_response(data)
       end
 
-      def build_json_response(parsed_json, test_name)
-        #0 = Green
-        #1 =
+      def build_json_response(data)
         possible_values = {
             0 => -1, #Pending
             1 => 0, #Passed
@@ -76,30 +72,20 @@ module Sources
             3 => 3, #Setup error
             4 => 3, #Upload error
         }
-        values_array = []
-        all_messages = Array.new
-        parsed_json.each do |json|
-          values_array.push(json["result_status_id"])
-          all_messages << {
-            "status" => "#{possible_values[json["result_status_id"]]}",
-            "label" => "#{json["target_model"]}",
-            "value" => "#{json["revision"]}".truncate(10),
-          }
 
+        messages = []
+        data['results'].each do |result|
+          messages << {
+            status: possible_values[result['result_status_id']],
+            label: result['target_model'],
+            value: result['revision'].truncate(10)
+          }
         end
-        if !values_array.empty?
-            item = 0
-            for i in values_array
-                if i != 0
-                    item = i
-                    break
-                end
-            end
-          overall_value = possible_values[item]
-        else
-          overall_value = 0
-        end
-        { :overall_value => overall_value, :first_value => {"label" => test_name, "value" => ""}, :label => all_messages }
+
+        last_completed = messages.find { |msg| msg[:status] >= 0 }
+        overall_value = last_completed ? last_completed[:status] : -1
+
+        { overall_value: overall_value, first_value: {label: data['name'], value: ""}, label: messages }
       end
 
     end
