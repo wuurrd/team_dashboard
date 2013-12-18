@@ -4,8 +4,13 @@
     <input name="name" ng-model="widget.name" type="text" autofocus required/>
   </div>
 
-  <div td-field label="Size">
+  <div td-field label="Size x">
     <select name="size_x" ng-model="widget.size_x" ng-options="i.value as i.label for i in sizes" required>
+    </select>
+  </div>
+
+  <div td-field label="Size y">
+    <select name="size_y" ng-model="widget.size_y" ng-options="i.value as i.label for i in sizes" required>
     </select>
   </div>
 
