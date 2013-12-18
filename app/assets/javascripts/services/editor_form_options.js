@@ -32,7 +32,9 @@ app.factory("EditorFormOptions", function() {
   var sizes = [
     { value: 1, label: "1 Column" },
     { value: 2, label: "2 Column" },
-    { value: 3, label: "3 Column" }
+    { value: 3, label: "3 Column" },
+    { value: 4, label: "4 Column" },
+    { value: 5, label: "5 Column" }
   ];
 
   var graphTypes = [
