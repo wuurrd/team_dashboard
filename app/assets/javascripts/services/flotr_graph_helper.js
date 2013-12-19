@@ -67,7 +67,8 @@ app.factory("FlotrGraphHelper", ["ColorFactory", "SuffixFormatter", "$window", f
       },
       yaxis: {
         tickFormatter: suffixFormatter,
-        max: model.max || null
+        max: model.max || null,
+        min: model.min
       },
       legend: {
         show: model.display_legend || false, labelBoxBorderColor: null, position: "ne"
