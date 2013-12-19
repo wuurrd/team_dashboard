@@ -58,8 +58,8 @@ module Sources
           exec_data << [exec_time, timestamp]
         end
         datapoints = []
-        datapoints << { target: "exec time}", datapoints: exec_data}
-        datapoints << { target: "wait time}", datapoints: wait_data}
+        datapoints << { target: "run time", datapoints: exec_data}
+        datapoints << { target: "wait time", datapoints: wait_data}
       end
 
       def valid(result)
